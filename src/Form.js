@@ -10,6 +10,13 @@ export default function Form() {
        system: "",
        terms: true 
     });
+    const [errors, setErrors] = useState({
+       name: "",
+       email: "",
+       password: "",
+       system: "",
+       terms: ""       
+    });
     const [buttonDisabled, setButtonDisable] = useState(true)
     const formSchema = yup.object().shape({
         name: yup.string().required("Name is a required field"),
@@ -27,6 +34,20 @@ export default function Form() {
         })
     }, [formState]);
 
+    const validateChange = e => {
+        yup.reach(formSchema, e.target.name).validate(e.target.value).then(valid => {
+            setErrors({
+                ...errors,
+                [e.target.name]: ""
+            })
+        }).catch(err => {
+            setErrors({
+                ...errors,
+                [e.target.name]: err.errors[0]
+            })
+        })
+    }
+
     const inputChange = e => {
         e.persist();
         console.log("changed", e.target.value);
@@ -39,33 +60,37 @@ export default function Form() {
     }
 
     return (
-        <form>
+        <form onSubmit={formSubmit}>
             <label htmlFor="name">
                 Name
                 <input id="name" type="text" name="name" value={formState.name} onChange={inputChange} />
+                {errors.name.length > 0 ? <p className="error">{errors.name}</p> : null}
             </label>
             <label htmlFor="email">
                 Email
-                <input id="email" type="email" name="email" />
+                <input id="email" type="email" name="email" value={formState.email} onChange={inputChange} />
+                {errors.email.length > 0 ? <p className="error">{errors.email}</p> : null}
             </label>
             <label htmlFor="password">
                 Password
-                <input id="password" type="password" name="password" />
+                <input id="password" type="password" name="password" value={formState.password} onChange={inputChange} />
+                {errors.password.length > 0 ? <p className="error">{errors.password}</p> : null}
             </label>
             <label htmlFor="system">
                 Your current operating system?
-                <select id="system" name="system">
+                <select id="system" name="system" onChange={inputChange}>
                     <option>--Please select an option--</option>
                     <option value="mac">macOS</option>
                     <option value="windows">Microsoft Windows</option>
                     <option value="linux">Linux</option>
                 </select>
+                {errors.system.length > 0 ? <p className="error">{errors.system}</p> : null}
             </label>
             <label htmlFor="terms" className="terms">
                 Terms and Conditions
-                <input id="terms" type="checkbox" name="terms" checked={true} />
+                <input id="terms" type="checkbox" name="terms" checked={formState.terms} onChange={inputChange} />
             </label>
-            <button disabled={buttonDisabled}>Submit</button>
+            <button type="submit" disabled={buttonDisabled}>Submit</button>
         </form>
     )
 }
