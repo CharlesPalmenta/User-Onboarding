@@ -17,6 +17,7 @@ export default function Form() {
        system: "",
        terms: ""       
     });
+    const [post, setPost] = useState();
     const [buttonDisabled, setButtonDisable] = useState(true)
     const formSchema = yup.object().shape({
         name: yup.string().required("Name is a required field"),
@@ -33,6 +34,25 @@ export default function Form() {
             setButtonDisable(!valid)
         })
     }, [formState]);
+
+    const formSubmit = e => {
+        e.preventDefault();
+        console.log("form submitted!");
+        axios
+            .post("https://reqres.in/api/users", formState)
+            .then(res => {
+                setPost(res.data)
+                console.log("success!")
+                setFormState({
+                    name: "",
+                    email: "",
+                    motivation: "",
+                    positions: "",
+                    terms: true 
+                })
+            })
+            .catch(err => console.log("error", err))
+    };
 
     const validateChange = e => {
         yup.reach(formSchema, e.target.name).validate(e.target.value).then(valid => {
@@ -91,6 +111,7 @@ export default function Form() {
                 <input id="terms" type="checkbox" name="terms" checked={formState.terms} onChange={inputChange} />
             </label>
             <button type="submit" disabled={buttonDisabled}>Submit</button>
+            <pre>{JSON.stringify(post, null, 2)}</pre>
         </form>
     )
 }
